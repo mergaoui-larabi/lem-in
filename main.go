@@ -9,55 +9,52 @@ import (
 )
 
 func main() {
-
-	// graph := map[string][]string{
-	// 	"start": {"room1", "room2"},
-	// 	"room1": {"room6", "room2"},
-	// 	"room2": {"room1", "room3"},
-	// 	"room3": {"end"},
-	// 	"room4": {"room1", "room3"},
-	// 	"room5": {"room2", "room5"},
-	// 	"room6": {"room1", "room5"},
-	// 	"end":   {"room1", "room2"},
-	// }
-	// visted := make(map[string]bool)
-
-	// tst := queue.Queue{}
-	// tst.Enqueue("start")
-	// tst.Enqueue("dhhd")
-	// fmt.Println("len 		:", tst.Length)
-	// tst.Print()
-	// fmt.Println("2	", tst.Dequeue())
-	// fmt.Println("2	", tst.Dequeue())
-	// fmt.Println("len 		:", tst.Length)
-	// tst.Print()
-
-	// fmt.Println("DFS :")
-	// DFS(graph, visted, "start")
-
-	// fmt.Println("BFS :")
-	// out := BFS(graph, visted, "start")
-	// fmt.Println(out)
 	var coords []graph.Room
+	var paths [][]string
+	var buffer []string
 	newGraph := graph.Graph{Colony: make(map[string][]string)}
-	err := extract.Parse("./tests/example05.txt", &newGraph, &coords)
-	for i, v := range newGraph.Colony {
-		fmt.Println(i, v)
+	err := extract.Parse("./tests/example01.txt", &newGraph, &coords)
+	v := make(map[string]bool)
+	// for k, v := range newGraph.Colony {
+	// 	fmt.Println(k, v)
+	// }
+	fmt.Println("start: ", newGraph.Colony[newGraph.Start])
+	DFS(&newGraph, v, newGraph.Start, &paths, &buffer)
+	for _, v := range paths {
+		fmt.Println(v)
 	}
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
-func DFS(graph map[string][]string, visted map[string]bool, start string) {
-	// if start != "end" && start != "start" {
-	// }
-	visted[start] = true
+func DFS(graph *graph.Graph, visited map[string]bool, current string, paths *[][]string, buffer *[]string) {
+	// Mark the current room as visited
+	visited[current] = true
 
-	fmt.Println(start)
-	for _, link := range graph[start] {
-		if !visted[link] {
-			DFS(graph, visted, link)
+	// Add the current room to the buffer
+	*buffer = append(*buffer, current)
+
+	// If the current room is the end room, save the path
+	if current == graph.End {
+		// Save a copy of the buffer into paths
+		path := make([]string, len(*buffer))
+		copy(path, *buffer)
+		*paths = append(*paths, path)
+	} else {
+		// Explore all unvisited neighbors
+		for _, link := range graph.Colony[current] {
+			if !visited[link] {
+				DFS(graph, visited, link, paths, buffer)
+			}
 		}
 	}
+
+	// Backtrack:
+	// Remove the current room from the buffer and mark it as unvisited
+	*buffer = (*buffer)[:len(*buffer)-1]
+	visited[current] = false
 }
 
 func BFS(graph map[string][]string, visted map[string]bool, start string) []string {

@@ -17,10 +17,7 @@ func (e *errstr) Error() string {
 }
 
 func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
-
-	var start, end string
 	var found_start, found_end bool
-	var ants int
 	var no_space []string
 
 	info, err := os.ReadFile(file)
@@ -40,7 +37,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 			return &errstr{"Error: your room name starts with an L"}
 		}
 		if i == 0 {
-			ants, err = strconv.Atoi(Splited[i])
+			data.Ants, err = strconv.Atoi(Splited[i])
 			if err != nil {
 				return err
 			}
@@ -52,7 +49,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 			if len(no_space) != 3 {
 				return &errstr{"Error: room infos are invalid!"}
 			}
-			start = no_space[0]
+			data.Start = no_space[0]
 			continue
 		}
 		if strings.HasPrefix(Splited[i], "##end") && i != len(Splited)-1 {
@@ -61,7 +58,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 			if len(no_space) != 3 {
 				return &errstr{"Error: room infos are invalid!"}
 			}
-			end = no_space[0]
+			data.End = no_space[0]
 			continue
 		}
 		if strings.HasPrefix(Splited[i], "#") {
@@ -84,7 +81,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 		fmt.Println("Error: the given file doesn't provide an end")
 		return nil
 	}
-	fmt.Printf("start:%v | end:%v | ants:%v\n", start, end, ants)
+	// fmt.Printf("start:%v | end:%v | ants:%v\n", data.Start, data.End, data.Ants)
 	return nil
 }
 

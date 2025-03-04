@@ -7,5 +7,8 @@ type Room struct {
 }
 
 type Graph struct {
+	Ants   int
+	Start  string
+	End    string
 	Colony map[string][]string
 }
