@@ -3,47 +3,35 @@ package main
 import (
 	"fmt"
 	"lem-in/graph"
-	"lem-in/helpers"
 	extract "lem-in/parse"
 	queue "lem-in/queue"
 )
 
 func main() {
 	var coords []graph.Room
-	var paths [][]string
-	var buffer []string
+
 	newGraph := graph.Graph{Colony: make(map[string][]string)}
-	err := extract.Parse("./tests/example01.txt", &newGraph, &coords)
-	v := make(map[string]bool)
-	// for k, v := range newGraph.Colony {
-	// 	fmt.Println(k, v)
-	// }
-	fmt.Println("start: ", newGraph.Colony[newGraph.Start])
-	DFS(&newGraph, v, newGraph.Start, &paths, &buffer)
-	for _, v := range paths {
-		fmt.Println(v)
-	}
+	err := extract.Parse("./tests/message.txt", &newGraph, &coords)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	// fmt.Println(newGraph.Colony)
+	paths := FindPaths(newGraph.Colony, newGraph.Start, newGraph.End)
+	fmt.Println("BFS paths :", paths)
 }
 
 func DFS(graph *graph.Graph, visited map[string]bool, current string, paths *[][]string, buffer *[]string) {
-	// Mark the current room as visited
-	visited[current] = true
 
-	// Add the current room to the buffer
+	visited[current] = true
 	*buffer = append(*buffer, current)
 
-	// If the current room is the end room, save the path
 	if current == graph.End {
-		// Save a copy of the buffer into paths
 		path := make([]string, len(*buffer))
 		copy(path, *buffer)
 		*paths = append(*paths, path)
 	} else {
-		// Explore all unvisited neighbors
+
 		for _, link := range graph.Colony[current] {
 			if !visited[link] {
 				DFS(graph, visited, link, paths, buffer)
@@ -52,34 +40,54 @@ func DFS(graph *graph.Graph, visited map[string]bool, current string, paths *[][
 	}
 
 	// Backtrack:
-	// Remove the current room from the buffer and mark it as unvisited
+
 	*buffer = (*buffer)[:len(*buffer)-1]
 	visited[current] = false
 }
 
-func BFS(graph map[string][]string, visted map[string]bool, start string) []string {
-	var path []string
+func BFS(graph map[string][]string, visited map[string]bool, start, end string) (map[string]string, []string) {
+	parent := make(map[string]string)
+	parent[start] = ""
 	list := queue.Queue{}
 	list.Enqueue(start)
-	visted[start] = false
+
+	visited[start] = true
 
 	for !list.IsEmpty() {
-		list.Print()
 		room := list.Dequeue()
-		path = append(path, room)
 
-		visted[room] = true
-		if helpers.Contains("end", graph[room]) {
-			path = append(path, "end")
-			return path
+		if room == end {
+			fmt.Println("parent map:", parent)
+			return parent, reconstructPath(parent, start, end)
 		}
+
 		for _, link := range graph[room] {
-			if !visted[link] {
-				visted[link] = true
+			if !visited[link] {
+				visited[link] = true
 				list.Enqueue(link)
+				parent[link] = room
 			}
 		}
-
 	}
-	return nil
+
+	return parent, []string{}
+}
+
+func reconstructPath(parent map[string]string, start, end string) []string {
+	path := []string{}
+	for node := end; node != ""; node = parent[node] {
+		path = append([]string{node}, path...) // Prepend to maintain order
+	}
+	return path
+}
+
+func FindPaths(graph map[string][]string, start, end string) [][]string {
+	var paths [][]string
+	for _, link := range graph[start] {
+		visited := make(map[string]bool)
+		visited[start] = true
+		_, path := BFS(graph, visited, link, end)
+		paths = append(paths, path)
+	}
+	return paths
 }
