@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"fmt"
 	"lem-in/queue"
 )
 
@@ -17,7 +16,6 @@ func BFS(graph map[string][]string, visited map[string]bool, start, end string) 
 		room := list.Dequeue()
 
 		if room == end {
-			fmt.Println("parent map:", parent)
 			return parent, reconstructPath(parent, start, end)
 		}
 
