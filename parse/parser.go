@@ -2,10 +2,11 @@ package parse
 
 import (
 	"fmt"
-	"lem-in/graph"
 	"os"
 	"strconv"
 	"strings"
+
+	"lem-in/graph"
 )
 
 type errstr struct {
@@ -37,7 +38,8 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 			return &errstr{"Error: your room name starts with an L"}
 		}
 		if i == 0 {
-			data.Ants, err = strconv.Atoi(Splited[i])
+			data.AntsNumber, err = strconv.Atoi(Splited[i])
+			data.Ants = make([]graph.Ant, data.AntsNumber)
 			if err != nil {
 				return err
 			}
@@ -49,7 +51,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 			if len(no_space) != 3 {
 				return &errstr{"Error: room infos are invalid!"}
 			}
-			data.Start = no_space[0]
+			data.Start = &graph.Room{Name: no_space[0]}
 			continue
 		}
 		if strings.HasPrefix(Splited[i], "##end") && i != len(Splited)-1 {
@@ -58,7 +60,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 			if len(no_space) != 3 {
 				return &errstr{"Error: room infos are invalid!"}
 			}
-			data.End = no_space[0]
+			data.End = &graph.Room{Name: no_space[0]}
 			continue
 		}
 		if strings.HasPrefix(Splited[i], "#") {
@@ -105,7 +107,8 @@ func AddRoom(no_space []string, data *graph.Graph, coords *[]graph.Room) error {
 		X:    x,
 		Y:    y,
 	}
-	data.Colony[r.Name] = []string{}
+	data.Colony[r.Name] = []*graph.Room{}
+	data.RoomNumber++
 	*coords = append(*coords, *r)
 	return nil
 }
@@ -114,7 +117,9 @@ func AddLink(no_space []string, data *graph.Graph) error {
 	if len(no_space) != 2 {
 		return &errstr{"Error: some rooms have invalid links"}
 	}
-	data.Colony[no_space[0]] = append(data.Colony[no_space[0]], no_space[1])
-	data.Colony[no_space[1]] = append(data.Colony[no_space[1]], no_space[0])
+
+	data.Colony[no_space[0]] = append(data.Colony[no_space[0]], &graph.Room{Name: no_space[1]})
+	data.Colony[no_space[1]] = append(data.Colony[no_space[1]], &graph.Room{Name: no_space[0]})
+	data.LinkNumber++
 	return nil
 }

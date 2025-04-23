@@ -2,15 +2,25 @@ package graph
 
 type Room struct {
 	Name string
-	//TODO: Nieghbours []string  further implementation
 	X    int
 	Y    int
+	FREE bool
+}
+
+type Ant struct {
+	Name    string
+	Path    int
+	Movable bool
+	Current string
 }
 
 type Graph struct {
-	//TODO start , end *Room further implementation
-	Ants   int
-	Start  string
-	End    string
-	Colony map[string][]string
+	// TODO start , end *Room further implementation
+	Ants       []Ant
+	AntsNumber int
+	Start      *Room
+	End        *Room
+	Colony     map[string][]*Room
+	RoomNumber int
+	LinkNumber int
 }

@@ -2,27 +2,40 @@ package solver
 
 import (
 	"fmt"
+	"strconv"
+
 	"lem-in/graph"
 )
 
-func Solver(rooms *graph.Graph) {
-
+func Solver(Graph *graph.Graph) {
 	var _ [][]string
-	distirbution, paths := AntDistribution(rooms.Colony, rooms.Start, rooms.End, rooms.Ants)
+	distirbution, paths := AntDistribution(Graph.Colony, Graph.Start.Name, Graph.End.Name, Graph.AntsNumber)
 	var i int
+	ant := 1
 
-	for distirbution[0] != 0 {
-		if distirbution[i] > 0 {
-			distirbution[i]--
+	for distirbution[0] != 0 || ant <= Graph.AntsNumber {
+		if i == len(distirbution) {
+			i = 0
+			continue
 		}
-		i++
+		if distirbution[i] > 0 {
+			Graph.Ants[ant-1] = graph.Ant{
+				Name:    strconv.Itoa(ant),
+				Path:    i,
+				Current: Graph.Start.Name,
+			}
+			distirbution[i]--
+			ant++
+		}
 		if distirbution[i] == 0 {
 			i = 0
 			continue
 		}
+		i++
 	}
-	fmt.Println(distirbution)
 	fmt.Println(paths)
-	ants := AntsWay(3, rooms.Ants, paths)
-	fmt.Println(ants)
+	MoveAnts(Graph, len(paths))
+	// ants := AntsWay(len(paths), Graph.AntsNumber, paths)
+	// fmt.Println(ants)
+	fmt.Println(Graph.Ants)
 }

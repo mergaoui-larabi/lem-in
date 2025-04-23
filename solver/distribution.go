@@ -1,16 +1,17 @@
 package solver
 
 import (
+	"lem-in/graph"
 	"lem-in/helpers"
 )
 
-func AntDistribution(graph map[string][]string, start, end string, antsnumber int) ([]int,[][]string) {
+func AntDistribution(graph map[string][]*graph.Room, start, end string, antsnumber int) ([]int, [][]string) {
 	// pathsxmp := [][]string{{"1"}, {"1"}, {"1"}, {"1"}}
 
 	paths := FindPaths(graph, start, end)
 	helpers.SortPaths(&paths)
 
-	var ants_amount = make([]int, len(paths))
+	ants_amount := make([]int, len(paths))
 
 	for antsnumber > 0 {
 		path_to_increment := 0
@@ -23,7 +24,8 @@ func AntDistribution(graph map[string][]string, start, end string, antsnumber in
 			}
 		}
 		ants_amount[path_to_increment]++
+
 		antsnumber--
 	}
-	return ants_amount,paths
+	return ants_amount, paths
 }

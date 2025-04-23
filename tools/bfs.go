@@ -1,37 +1,43 @@
 package tools
 
 import (
+	"lem-in/graph"
 	"lem-in/queue"
 )
 
-func BFS(graph map[string][]string, visited map[string]bool, start, end string) (map[string]string, []string) {
+func BFS(graph map[string][]*graph.Room, start, end string, visited *map[string]bool) []string {
 	parent := make(map[string]string)
 	parent[start] = ""
 	list := queue.Queue{}
 	list.Enqueue(start)
 
-	visited[start] = true
+	(*visited)[start] = true
 
 	for !list.IsEmpty() {
 		room := list.Dequeue()
 
 		if room == end {
-			return parent, reconstructPath(parent, start, end)
+			(*visited) = make(map[string]bool)
+			path := reconstructPath(parent, end)
+			for i := 0; i < len(path)-1; i++ {
+				(*visited)[path[i]] = true
+			}
+			return path
 		}
 
 		for _, link := range graph[room] {
-			if !visited[link] {
-				visited[link] = true
-				list.Enqueue(link)
-				parent[link] = room
+			if !(*visited)[link.Name] {
+				(*visited)[link.Name] = true
+				list.Enqueue(link.Name)
+				parent[link.Name] = room
 			}
 		}
 	}
 
-	return parent, []string{}
+	return []string{}
 }
 
-func reconstructPath(parent map[string]string, start, end string) []string {
+func reconstructPath(parent map[string]string, end string) []string {
 	path := []string{}
 	for node := end; node != ""; node = parent[node] {
 		path = append([]string{node}, path...) // Prepend to maintain order
