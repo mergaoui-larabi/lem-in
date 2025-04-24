@@ -33,8 +33,12 @@ func Solver(Graph *graph.Graph) {
 		}
 		i++
 	}
-	fmt.Println(paths)
-	MoveAnts(Graph, len(paths))
+	// fmt.Println(paths)
+	output := MoveAnts(Graph, paths)
+
+	for _, l := range output {
+		fmt.Println(l)
+	}
 	// ants := AntsWay(len(paths), Graph.AntsNumber, paths)
 	// fmt.Println(ants)
 	fmt.Println(Graph.Ants)

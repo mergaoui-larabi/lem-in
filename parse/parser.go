@@ -52,6 +52,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 				return &errstr{"Error: room infos are invalid!"}
 			}
 			data.Start = &graph.Room{Name: no_space[0]}
+			data.Rooms = append(data.Rooms, data.Start)
 			continue
 		}
 		if strings.HasPrefix(Splited[i], "##end") && i != len(Splited)-1 {
@@ -61,6 +62,7 @@ func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
 				return &errstr{"Error: room infos are invalid!"}
 			}
 			data.End = &graph.Room{Name: no_space[0]}
+			data.Rooms = append(data.Rooms, data.End)
 			continue
 		}
 		if strings.HasPrefix(Splited[i], "#") {
@@ -98,6 +100,7 @@ func AddRoom(no_space []string, data *graph.Graph, coords *[]graph.Room) error {
 	if err != nil {
 		return err
 	}
+
 	y, err = strconv.Atoi(no_space[2])
 	if err != nil {
 		return err
@@ -107,7 +110,8 @@ func AddRoom(no_space []string, data *graph.Graph, coords *[]graph.Room) error {
 		X:    x,
 		Y:    y,
 	}
-	data.Colony[r.Name] = []*graph.Room{}
+	data.Rooms = append(data.Rooms, r)
+	data.Colony[r.Name] = []string{}
 	data.RoomNumber++
 	*coords = append(*coords, *r)
 	return nil
@@ -118,8 +122,8 @@ func AddLink(no_space []string, data *graph.Graph) error {
 		return &errstr{"Error: some rooms have invalid links"}
 	}
 
-	data.Colony[no_space[0]] = append(data.Colony[no_space[0]], &graph.Room{Name: no_space[1]})
-	data.Colony[no_space[1]] = append(data.Colony[no_space[1]], &graph.Room{Name: no_space[0]})
+	data.Colony[no_space[0]] = append(data.Colony[no_space[0]], no_space[1])
+	data.Colony[no_space[1]] = append(data.Colony[no_space[1]], no_space[0])
 	data.LinkNumber++
 	return nil
 }

@@ -15,12 +15,12 @@ type Ant struct {
 }
 
 type Graph struct {
-	// TODO start , end *Room further implementation
 	Ants       []Ant
 	AntsNumber int
+	Rooms      []*Room
 	Start      *Room
 	End        *Room
-	Colony     map[string][]*Room
+	Colony     map[string][]string
 	RoomNumber int
 	LinkNumber int
 }

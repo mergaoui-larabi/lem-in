@@ -1,11 +1,10 @@
 package solver
 
 import (
-	"lem-in/graph"
 	"lem-in/helpers"
 )
 
-func AntDistribution(graph map[string][]*graph.Room, start, end string, antsnumber int) ([]int, [][]string) {
+func AntDistribution(graph map[string][]string, start, end string, antsnumber int) ([]int, [][]string) {
 	// pathsxmp := [][]string{{"1"}, {"1"}, {"1"}, {"1"}}
 
 	paths := FindPaths(graph, start, end)
