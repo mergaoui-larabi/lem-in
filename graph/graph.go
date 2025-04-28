@@ -4,7 +4,7 @@ type Room struct {
 	Name string
 	X    int
 	Y    int
-	FREE bool
+	Free bool
 }
 
 type Ant struct {
@@ -12,15 +12,16 @@ type Ant struct {
 	Path    int
 	Movable bool
 	Current string
+	UniquePath []string
 }
 
 type Graph struct {
-	Ants       []Ant
 	AntsNumber int
+	RoomNumber int
+	LinkNumber int
+	Ants       []Ant
 	Rooms      []*Room
 	Start      *Room
 	End        *Room
 	Colony     map[string][]string
-	RoomNumber int
-	LinkNumber int
 }

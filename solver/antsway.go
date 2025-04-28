@@ -1,9 +1,7 @@
 package solver
 
 import (
-	"fmt"
 	"strconv"
-	"time"
 
 	"lem-in/graph"
 )
@@ -18,17 +16,13 @@ func MoveAnts(Graph *graph.Graph, path [][]string) [][]string {
 	full := make(map[string]bool)
 
 	for Graph.Ants[Graph.AntsNumber-1].Current != Graph.End.Name {
-		fmt.Println("_________________________")
-		time.Sleep(time.Millisecond * 1000)
-		for _, l := range steps {
-			fmt.Println(l)
-		}
 
+		// time.Sleep(time.Millisecond * 1000)
 		if selected == Graph.AntsNumber {
 			selected = 0
 		}
 
-		selected_path := path[Graph.Ants[selected].Path]
+		selected_path := Graph.Ants[selected].UniquePath
 		current := Graph.Ants[selected].Current
 		intersection := potentielRoom(selected_path, Graph.Colony[current])
 
@@ -38,34 +32,49 @@ func MoveAnts(Graph *graph.Graph, path [][]string) [][]string {
 			}
 		}
 
-		fmt.Println("full :", full)
-		fmt.Println("selected :", selected)
-		fmt.Println("room ", Graph.Ants[selected])
-		fmt.Println("inter", intersection)
-		fmt.Println("avail", availabe)
-		fmt.Println("end", Graph.End.Name)
+		// fmt.Println("selected :", selected)
+		// fmt.Println(Graph.Ants)
+
+		// fmt.Println("_________________________")
+		// for _, l := range steps {
+		// 	fmt.Println(l)
+		// }
+
+		// fmt.Println("selected :", selected)
+		// fmt.Println("buffer", buffer)
+		// fmt.Println("full :", full)
+		// fmt.Println("room ", Graph.Ants[selected])
+		// fmt.Println("inter", intersection)
+		// fmt.Println("avail", availabe)
+		// fmt.Println("end", Graph.End.Name)
+
+		// fmt.Println("************************")
 
 		if Graph.Ants[selected].Current == Graph.End.Name {
-			fmt.Println("wasalna")
 			selected++
 			continue
 		}
 
 		if !full[availabe] {
-			fmt.Println("if")
 			full[Graph.Ants[selected].Current] = false
 			Graph.Ants[selected].Movable = true
 			Graph.Ants[selected].Current = availabe
+			Graph.Ants[selected].UniquePath = Graph.Ants[selected].UniquePath[1:]
 			s := strconv.Itoa(selected + 1)
 			move := "L" + s + "-" + availabe
 			buffer = append(buffer, move)
 			if availabe != Graph.End.Name {
 				full[availabe] = true
 			}
+			if selected == Graph.AntsNumber-1 {
+				selected = 0
+				steps = append(steps, buffer)
+				buffer = []string{}
+				continue
+			}
 			selected++
 			continue
 		} else {
-			fmt.Println("else")
 			Graph.Ants[selected].Movable = false
 			selected = 0
 			steps = append(steps, buffer)

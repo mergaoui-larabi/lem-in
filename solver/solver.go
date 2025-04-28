@@ -20,9 +20,10 @@ func Solver(Graph *graph.Graph) {
 		}
 		if distirbution[i] > 0 {
 			Graph.Ants[ant-1] = graph.Ant{
-				Name:    strconv.Itoa(ant),
-				Path:    i,
-				Current: Graph.Start.Name,
+				Name:       strconv.Itoa(ant),
+				Path:       i,
+				UniquePath: paths[i],
+				Current:    Graph.Start.Name,
 			}
 			distirbution[i]--
 			ant++
@@ -33,13 +34,9 @@ func Solver(Graph *graph.Graph) {
 		}
 		i++
 	}
-	// fmt.Println(paths)
 	output := MoveAnts(Graph, paths)
 
 	for _, l := range output {
 		fmt.Println(l)
 	}
-	// ants := AntsWay(len(paths), Graph.AntsNumber, paths)
-	// fmt.Println(ants)
-	fmt.Println(Graph.Ants)
 }

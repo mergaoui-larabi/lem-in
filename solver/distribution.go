@@ -5,7 +5,6 @@ import (
 )
 
 func AntDistribution(graph map[string][]string, start, end string, antsnumber int) ([]int, [][]string) {
-	// pathsxmp := [][]string{{"1"}, {"1"}, {"1"}, {"1"}}
 
 	paths := FindPaths(graph, start, end)
 	helpers.SortPaths(&paths)
