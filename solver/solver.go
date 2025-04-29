@@ -9,7 +9,7 @@ import (
 
 func Solver(Graph *graph.Graph) {
 	var _ [][]string
-	distirbution, paths := AntDistribution(Graph.Colony, Graph.Start.Name, Graph.End.Name, Graph.AntsNumber)
+	distirbution, paths := AntDistribution(Graph, Graph.Start.Name, Graph.End.Name, Graph.AntsNumber)
 	var i int
 	ant := 1
 

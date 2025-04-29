@@ -12,22 +12,29 @@ func main() {
 	// start := time.Now()
 	var coords []graph.Room
 
-	newGraph := graph.Graph{Colony: make(map[string][]string)}
+	newGraph := graph.Graph{Colony: make(map[string][]*graph.Room)}
 	err := extract.Parse("./tests/maps/audit/example01", &newGraph, &coords)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	// fmt.Println("start", newGraph.Start.Name, "end", newGraph.End.Name)
 	// for i, r := range newGraph.Colony {
-
 	// 	fmt.Println(i, r)
 	// }
+	// for _, s := range newGraph.Rooms {
+	// 	fmt.Println(*s)
+	// }
 
-	// paths := solver.FindPaths(newGraph.Colony, newGraph.Start.Name, newGraph.End.Name)
-	// fmt.Println(paths)
+	paths := solver.FindPaths(&newGraph, newGraph.Start.Name, newGraph.End.Name)
+	fmt.Println(paths)
 
-	solver.Solver(&newGraph)
+	for _, s := range newGraph.Rooms {
+		fmt.Println(*s)
+	}
+
+	// solver.Solver(&newGraph)
 
 	// fmt.Println("THIS EXEC TOOK", time.Since(start))
 }

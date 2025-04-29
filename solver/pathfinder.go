@@ -1,18 +1,35 @@
 package solver
 
 import (
+	"lem-in/graph"
 	"lem-in/tools"
 )
 
-func FindPaths(graph map[string][]string, start, end string) [][]string {
+func FindPaths(graph *graph.Graph, start, end string) [][]string {
 	var paths [][]string
-	visited := make(map[string]bool)
-	for _, link := range graph[start] {
+	for _, link := range graph.Colony[start] {
+		visited := make(map[string]bool)
 		visited[start] = true
-		path := tools.BFS(graph, link, end, &visited)
+		path := tools.BFS(graph.Colony, link.Name, end, &visited)
 		if len(path) != 0 {
+			for _, room := range graph.Rooms {
+				if existInPath(room.Name, path) {
+					room.Explored = true
+					room.Path = path
+					room.Net = len(graph.Colony[room.Name])
+				}
+			}
 			paths = append(paths, path)
 		}
 	}
 	return paths
+}
+
+func existInPath(room string, path []string) bool {
+	for _, v := range path {
+		if v == room {
+			return true
+		}
+	}
+	return false
 }

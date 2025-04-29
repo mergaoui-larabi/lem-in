@@ -1,11 +1,11 @@
 package solver
 
 import (
+	"lem-in/graph"
 	"lem-in/helpers"
 )
 
-func AntDistribution(graph map[string][]string, start, end string, antsnumber int) ([]int, [][]string) {
-
+func AntDistribution(graph *graph.Graph, start, end string, antsnumber int) ([]int, [][]string) {
 	paths := FindPaths(graph, start, end)
 	helpers.SortPaths(&paths)
 

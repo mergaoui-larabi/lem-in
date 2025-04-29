@@ -87,7 +87,7 @@ func MoveAnts(Graph *graph.Graph, path [][]string) [][]string {
 	return steps
 }
 
-func potentielRoom(antPath, availabeRooms []string) []string {
+func potentielRoom(antPath []string, availabeRooms []*graph.Room) []string {
 	var intersection []string
 
 	set := make(map[string]bool)
@@ -97,8 +97,8 @@ func potentielRoom(antPath, availabeRooms []string) []string {
 	}
 
 	for _, room := range availabeRooms {
-		if set[room] {
-			intersection = append(intersection, room)
+		if set[room.Name] {
+			intersection = append(intersection, room.Name)
 		}
 	}
 	return intersection

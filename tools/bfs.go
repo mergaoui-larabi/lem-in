@@ -1,10 +1,11 @@
 package tools
 
 import (
+	"lem-in/graph"
 	"lem-in/queue"
 )
 
-func BFS(graph map[string][]string, start, end string, visited *map[string]bool) []string {
+func BFS(graph map[string][]*graph.Room, start, end string, visited *map[string]bool) []string {
 	parent := make(map[string]string)
 	parent[start] = ""
 	list := queue.Queue{}
@@ -21,14 +22,15 @@ func BFS(graph map[string][]string, start, end string, visited *map[string]bool)
 			for i := 0; i < len(path)-1; i++ {
 				(*visited)[path[i]] = true
 			}
+			path = path[:len(path)-1]
 			return path
 		}
 
 		for _, link := range graph[room] {
-			if !(*visited)[link] {
-				(*visited)[link] = true
-				list.Enqueue(link)
-				parent[link] = room
+			if !(*visited)[link.Name] {
+				(*visited)[link.Name] = true
+				list.Enqueue(link.Name)
+				parent[link.Name] = room
 			}
 		}
 	}
