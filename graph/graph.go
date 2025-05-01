@@ -7,6 +7,9 @@ type Room struct {
 	Free     bool
 	Explored bool
 	Path     []string
+	Index    int
+	Used     int
+	Head     string
 	Net      int
 }
 
@@ -23,7 +26,7 @@ type Graph struct {
 	RoomNumber int
 	LinkNumber int
 	Ants       []Ant
-	Rooms      []*Room
+	Rooms      map[string]*Room
 	Start      *Room
 	End        *Room
 	Colony     map[string][]*Room

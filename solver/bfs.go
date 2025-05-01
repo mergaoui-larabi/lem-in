@@ -1,12 +1,13 @@
-package tools
+package solver
 
 import (
 	"lem-in/graph"
 	"lem-in/queue"
 )
 
-func BFS(graph map[string][]*graph.Room, start, end string, visited *map[string]bool) []string {
+func BFS(graph *graph.Graph, start, end string, visited *map[string]bool) ([]string, bool) {
 	parent := make(map[string]string)
+	dupp := false
 	parent[start] = ""
 	list := queue.Queue{}
 	list.Enqueue(start)
@@ -23,11 +24,14 @@ func BFS(graph map[string][]*graph.Room, start, end string, visited *map[string]
 				(*visited)[path[i]] = true
 			}
 			path = path[:len(path)-1]
-			return path
+			return path, dupp
 		}
 
-		for _, link := range graph[room] {
+		for _, link := range graph.Colony[room] {
 			if !(*visited)[link.Name] {
+				if link.Explored {
+					dupp = true
+				}
 				(*visited)[link.Name] = true
 				list.Enqueue(link.Name)
 				parent[link.Name] = room
@@ -35,7 +39,7 @@ func BFS(graph map[string][]*graph.Room, start, end string, visited *map[string]
 		}
 	}
 
-	return []string{}
+	return []string{}, dupp
 }
 
 func reconstructPath(parent map[string]string, end string) []string {
