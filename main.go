@@ -13,7 +13,7 @@ func main() {
 	var coords []graph.Room
 
 	newGraph := graph.Graph{Colony: make(map[string][]*graph.Room), Rooms: make(map[string]*graph.Room)}
-	err := extract.Parse("./tests/maps/audit/example05", &newGraph, &coords)
+	err := extract.Parse("./tests/maps/audit/example01", &newGraph, &coords)
 	if err != nil {
 		fmt.Println(err)
 		return
