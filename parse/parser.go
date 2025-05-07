@@ -1,155 +1,139 @@
 package parse
 
 import (
+	"bufio"
+	"container/list"
 	"fmt"
+	constant "lem-in/const"
+	dsa "lem-in/dsa"
 	"os"
 	"strconv"
-	"strings"
-
-	"lem-in/graph"
 )
 
-type errstr struct {
-	data string
+// implement the error interface{}
+type ErrorMessage struct {
+	Msg string
 }
 
-func (e *errstr) Error() string {
-	return e.data
+func (e *ErrorMessage) Error() string {
+	return e.Msg
 }
 
-func Parse(file string, data *graph.Graph, coords *[]graph.Room) error {
-	var found_start, found_end bool
-	var no_space []string
-
-	info, err := os.ReadFile(file)
-	if err != nil {
-		fmt.Println("ERROR:", err)
+func FileExist(filename string) error {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return &ErrorMessage{Msg: "ERROR:The File " + filename + " Doesn't Exist in The Specifeid Path"}
 	}
-	text := string(info)
-	Splited := strings.FieldsFunc(text, func(r rune) bool {
-		if r == 10 || r == 13 {
-			return true
-		}
-		return false
-	})
-
-	for i := range Splited {
-
-		if strings.HasPrefix(Splited[i], "L") {
-			return &errstr{"Error: your room name starts with an L"}
-		}
-		if i == 0 {
-			data.AntsNumber, err = strconv.Atoi(Splited[i])
-			// data.Ants = make([]graph.Ant, data.AntsNumber)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-		if strings.HasPrefix(Splited[i], "##start") && i != len(Splited)-1 {
-			found_start = true
-			no_space = strings.Fields(Splited[i+1])
-			if len(no_space) != 3 {
-				return &errstr{"Error: room infos are invalid!"}
-			}
-			x, err := strconv.Atoi(no_space[1])
-			if err != nil {
-				return err
-			}
-
-			y, err := strconv.Atoi(no_space[2])
-			if err != nil {
-				return err
-			}
-			data.Start = &graph.Room{Name: no_space[0], X: x, Y: y}
-			data.Rooms[data.Start.Name] = data.Start
-			continue
-		}
-		if strings.HasPrefix(Splited[i], "##end") && i != len(Splited)-1 {
-			found_end = true
-			no_space = strings.Fields(Splited[i+1])
-			if len(no_space) != 3 {
-				return &errstr{"Error: room infos are invalid!"}
-			}
-			x, err := strconv.Atoi(no_space[1])
-			if err != nil {
-				return err
-			}
-
-			y, err := strconv.Atoi(no_space[2])
-			if err != nil {
-				return err
-			}
-			data.End = &graph.Room{Name: no_space[0], X: x, Y: y}
-			data.Rooms[data.End.Name] = data.End
-			continue
-		}
-		if strings.HasPrefix(Splited[i], "#") {
-			continue
-		}
-		if strings.Contains(Splited[i], "-") {
-			copy := strings.Replace(Splited[i], "-", " ", 1)
-			no_space = strings.Fields(copy)
-			AddLink(no_space, data)
-		}
-		no_space = strings.Fields(Splited[i])
-
-		AddRoom(no_space, data, coords)
-
+	if info.IsDir() {
+		return &ErrorMessage{Msg: "ERROR:You Have Entered a Directory Path Istead Of a File Path"}
 	}
-	if !found_start {
-		fmt.Println("Error: the given file doesn't provide a start")
-		return nil
-	}
-	if !found_end {
-		fmt.Println("Error: the given file doesn't provide an end")
-		return nil
-	}
-	// fmt.Printf("start:%v | end:%v | ants:%v\n", data.Start, data.End, data.Ants)
 	return nil
 }
 
-func AddRoom(no_space []string, data *graph.Graph, coords *[]graph.Room) error {
-	var x, y int
+func FileToGraph(filename string) (*dsa.Antfarm, error) {
 	var err error
-	var r *graph.Room
-	if len(no_space) != 3 {
-		return &errstr{"Error: room infos are invalid!"}
+	err = FileExist(filename)
+	if err != nil {
+		return nil, err
+	}
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, &ErrorMessage{Msg: constant.ErrFileIssue}
+	}
+	defer file.Close()
+	graph := dsa.NewAntFarm()
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		err := ParseLine(graph, scanner.Text())
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	x, err = strconv.Atoi(no_space[1])
-	if err != nil {
-		return err
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Scanner error:", err)
 	}
 
-	y, err = strconv.Atoi(no_space[2])
-	if err != nil {
-		return err
+	return graph, nil
+}
+
+func ParseLine(graph *dsa.Antfarm, line string) error {
+	if IsComment(line) || line == "" {
+		return nil
 	}
-	r = &graph.Room{
-		Name: no_space[0],
-		X:    x,
-		Y:    y,
+	switch graph.Data.Phase {
+	case constant.AntsField:
+		return ParseAntNumber(graph, line)
+	case constant.RoomsField:
+		return ParseRooms(graph, line)
+	case constant.LinksField:
+		return ParseLinks(graph, line)
 	}
-	data.Rooms[r.Name] = r
-	data.Colony[r.Name] = []*graph.Room{}
-	data.RoomNumber++
-	*coords = append(*coords, *r)
 	return nil
 }
 
-func AddLink(no_space []string, data *graph.Graph) error {
-	if len(no_space) != 2 {
-		return &errstr{"Error: some rooms have invalid links"}
+func ParseAntNumber(graph *dsa.Antfarm, line string) error {
+	n, err := strconv.Atoi(line)
+	if err != nil {
+		return &ErrorMessage{Msg: constant.ErrAnts}
 	}
-	for _, room := range data.Rooms {
-		if room.Name == no_space[0] {
-			data.Colony[no_space[1]] = append(data.Colony[no_space[1]], room)
+	if n <= 0 || n > (1<<31-1) {
+		return &ErrorMessage{Msg: constant.ErrAnts}
+	}
+	graph.Nants = n
+	graph.Data.Phase = constant.RoomsField
+	return nil
+}
+
+func ParseRooms(graph *dsa.Antfarm, line string) error {
+	if IsStart(line) && !graph.Data.StartFound {
+		graph.Data.StartFound = true
+	} else if IsEnd(line) && !graph.Data.EndFound {
+		graph.Data.EndFound = true
+	} else {
+		room, err := GetRoom(graph, line)
+		if err != nil {
+			return err
 		}
-		if room.Name == no_space[1] {
-			data.Colony[no_space[0]] = append(data.Colony[no_space[0]], room)
+		if graph.Rooms[room] != nil {
+			return &ErrorMessage{Msg: "ERROR: the room " + room + " is dupplicated"}
+		}
+		if room != "" {
+			node := &dsa.Room{Name: room, Parent: "L", Edges: make(map[string]byte)}
+			if graph.Data.StartFound && graph.Start == "" {
+				graph.Start = room
+			} else if graph.Data.EndFound && graph.End == "" {
+				graph.End = room
+			}
+			graph.Rooms[room] = &node
+			graph.Exits = list.New()
+		} else if graph.Start != "" && graph.End != "" {
+			graph.Data.Phase = constant.LinksField
+			graph.Data.Coords = nil // free up memory from rooms coords because they are unusable
+			return ParseLine(graph, line)
+		} else {
+			return &ErrorMessage{Msg: constant.ErrNoStart + " or " + constant.ErrNoEnd}
 		}
 	}
-	data.LinkNumber++
+	return nil
+}
+
+func ParseLinks(graph *dsa.Antfarm, line string) error {
+	firstRoom, secondRoom := GetLink(line)
+	if firstRoom == "" || secondRoom == "" {
+		return &ErrorMessage{Msg: constant.ErrLink}
+	}
+	if firstRoom == secondRoom {
+		return &ErrorMessage{Msg: constant.ErrLink}
+	}
+	if graph.Rooms[firstRoom] == nil || graph.Rooms[secondRoom] == nil {
+		return &ErrorMessage{Msg: constant.ErrLink}
+	}
+	node1 := *graph.Rooms[firstRoom]
+	node1.Edges[secondRoom] = 1
+
+	node2 := *graph.Rooms[secondRoom]
+	node2.Edges[firstRoom] = 1
 	return nil
 }
