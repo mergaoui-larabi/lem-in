@@ -69,8 +69,9 @@ func ParseLine(graph *dsa.Antfarm, line string) error {
 		return ParseRooms(graph, line)
 	case constant.LinksField:
 		return ParseLinks(graph, line)
+	default:
+		return &ErrorMessage{Msg: "something went wrong while parsing"}
 	}
-	return nil
 }
 
 func ParseAntNumber(graph *dsa.Antfarm, line string) error {
